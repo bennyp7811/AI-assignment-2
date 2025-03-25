@@ -16,8 +16,40 @@ int main(int argc, char *argv[])
 
   cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_SILENT);
 
+  cv::Mat frame;
+  double fps = 30;
+  const char win_name[] = "Live Video...";
   std::vector<cv::Mat> images;
   std::vector<int>     labels;
+
+  std::cout << "Wait 60 secs. for camera access to be obtained..." << std::endl;
+  cv::VideoCapture vid_in(0);   // argument is the camera id
+
+  if (vid_in.isOpened())
+  {
+      std::cout << "Camera capture obtained." << std::endl;
+  }
+  else
+  {
+      std::cerr << "error: Camera 0 could not be opened for capture.\n";
+      return -1;
+  }
+
+  cv::namedWindow(win_name);
+
+  int i{ 0 }; // a simple counter to save multiple images
+  while (1) {
+      vid_in >> frame;
+      cv::imshow(win_name, frame);
+      int code = cv::waitKey(1000 / fps); // how long to wait for a key (msecs)
+      if (code == 27) // escape. See http://www.asciitable.com/
+          break;
+      else if (code == 32) // space.  ""
+          //      cv::imwrite("../out.png", frame);
+          cv::imwrite(std::string("../out") + std::to_string(i++) + ".png", frame);
+  }
+
+  vid_in.release();
 
   // Iterate through all subdirectories, looking for .pgm files
   fs::path p(argc > 1 ? argv[1] : "../../att_faces");
