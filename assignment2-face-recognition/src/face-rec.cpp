@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
   const char win_name[] = "Live Video...";
   std::vector<cv::Mat> images;
   std::vector<int>     labels;
-
+  /*
   std::cout << "Wait 60 secs. for camera access to be obtained..." << std::endl;
   cv::VideoCapture vid_in(0);   // argument is the camera id
 
@@ -46,10 +46,10 @@ int main(int argc, char *argv[])
           break;
       else if (code == 32) // space.  ""
           //      cv::imwrite("../out.png", frame);
-          cv::imwrite(std::string("../out") + std::to_string(i++) + ".png", frame);
+          cv::imwrite(std::string("../out") + std::to_string(i++) + ".png", frame); // takes photo and prints 
   }
 
-  vid_in.release();
+  vid_in.release();*/
 
   // Iterate through all subdirectories, looking for .pgm files
   fs::path p(argc > 1 ? argv[1] : "../../att_faces");
