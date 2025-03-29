@@ -21,35 +21,8 @@ int main(int argc, char *argv[])
   const char win_name[] = "Live Video...";
   std::vector<cv::Mat> images;
   std::vector<int>     labels;
-  /*
-  std::cout << "Wait 60 secs. for camera access to be obtained..." << std::endl;
-  cv::VideoCapture vid_in(0);   // argument is the camera id
-
-  if (vid_in.isOpened())
-  {
-      std::cout << "Camera capture obtained." << std::endl;
-  }
-  else
-  {
-      std::cerr << "error: Camera 0 could not be opened for capture.\n";
-      return -1;
-  }
-
-  cv::namedWindow(win_name);
-
-  int i{ 0 }; // a simple counter to save multiple images
-  while (1) {
-      vid_in >> frame;
-      cv::imshow(win_name, frame);
-      int code = cv::waitKey(1000 / fps); // how long to wait for a key (msecs)
-      if (code == 27) // escape. See http://www.asciitable.com/
-          break;
-      else if (code == 32) // space.  ""
-          //      cv::imwrite("../out.png", frame);
-          cv::imwrite(std::string("../out") + std::to_string(i++) + ".png", frame); // takes photo and prints 
-  }
-
-  vid_in.release();*/
+  cv::Mat grey_roi;
+  
 
   // Iterate through all subdirectories, looking for .pgm files
   fs::path p(argc > 1 ? argv[1] : "../../att_faces");
@@ -63,22 +36,50 @@ int main(int argc, char *argv[])
       }
     }
   }
+  std::cout << "Wait 60 secs. for camera access to be obtained..." << std::endl;
+  cv::VideoCapture vid_in(0);   // argument is the camera id
 
-// Randomly choose an image and test the system
-  std::random_device dev{};
-  std::mt19937 generator{dev()};
-  std::uniform_int_distribution<int> dist{0, static_cast<int>(images.size() - 1)};
-  int rand_image_id = dist(generator); // random image id
+  if (vid_in.isOpened())
+  {
+      std::cout << "Camera capture obtained." << std::endl;
+  }
+  else
+  {
+      std::cerr << "error: Camera 0 could not be opened for capture.\n";
+      return -1;
+  }
+  cv::namedWindow(win_name);
+  int i{ 0 }; // a simple counter to save multiple images
+  while (1) {
+      vid_in >> frame;
+   
+      cv::Rect rect{ 250, 200, 200, 200 };
+      cv::rectangle(frame, rect, cv::Scalar{ 0, 0, 255 });
+      cv::imshow(win_name, frame);
+      int code = cv::waitKey(1000 / fps); // how long to wait for a key (msecs)
+      if (code == 27) // escape. See http://www.asciitable.com/
+          break;
+      else if (code == 32) // space.  ""
+      { 
+          cv::Mat roi(frame, rect), grey_roi;
+          cv::cvtColor(roi, grey_roi, cv::COLOR_BGR2GRAY);
 
-  cv::Mat testSample = images[rand_image_id];
-  int     testLabel  = labels[rand_image_id];
-  std::cout << "Actual class    = " << testLabel << '\n';
-  std::cout << " training...";
+          cv::Mat small_roi;
+          cv::resize(grey_roi, small_roi, cv::Size(92, 112));
 
-  cv::Ptr<cv::face::BasicFaceRecognizer> model = cv::face::EigenFaceRecognizer::create();
-  model->train(images, labels);
-  int predictedLabel = model->predict(testSample);
-  std::cout << "\nPredicted class = " << predictedLabel << '\n';
+
+          cv::Ptr<cv::face::BasicFaceRecognizer> model = cv::face::EigenFaceRecognizer::create();
+          model->train(images, labels);
+          int predictedLabel = model->predict(small_roi);
+          std::cout << "\nPredicted class = " << predictedLabel << '\n';
+      }
+     
+  }
+
+  vid_in.release();
+
+
+
 
   return 0;
 }
