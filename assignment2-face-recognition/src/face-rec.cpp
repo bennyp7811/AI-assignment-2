@@ -67,10 +67,11 @@ int main(int argc, char *argv[])
           cv::Mat small_roi;
           cv::resize(grey_roi, small_roi, cv::Size(92, 112));
 
-
+          std::cout << "\nThinking..";
           cv::Ptr<cv::face::BasicFaceRecognizer> model = cv::face::EigenFaceRecognizer::create();
           model->train(images, labels);
           int predictedLabel = model->predict(small_roi);
+          
           std::cout << "\nPredicted class = " << predictedLabel << '\n';
       }
      
